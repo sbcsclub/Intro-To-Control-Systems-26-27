@@ -1,6 +1,9 @@
 import numpy as np
 import random, math
 import matplotlib.pyplot as plt
+from scipy.datasets import electrocardiogram
+from matplotlib.widgets import CheckButtons
+
 
 def savitsky_golay(data, window_size, degree):
     half = window_size//2
@@ -30,23 +33,58 @@ def savitsky_golay(data, window_size, degree):
 
     return filtered
 
-num_points = 100
-x = np.linspace(0, 10, num_points) #Creates 100 evenly spaced points from 1-10
 
-true_signal = np.sin(x)+5 #Creates target signal
+# Load real ECG sensor data
+ecg_data = electrocardiogram()
 
-noise = np.random.normal(0, 0.25, num_points) #Creates noise for the data
+# ECG sensor data is collected at 360 measurements per second
+sample_rate = 360
 
-sensor_data = true_signal + noise
+# Select data points from the ECG recording
+sensor_data = ecg_data[2000:2300]
 
-filtered_data = savitsky_golay(sensor_data, 11, 2)
+# Creates time values based on the sampling rate
+x = np.arange(len(sensor_data)) / sample_rate
+
+
+filtered_data = savitsky_golay(sensor_data, 21, 5)
+
 
 #Plots Data
-plt.plot(x, sensor_data, label="Noisy Sensor Data")
-plt.plot(x, true_signal, label="True Signal")
-plt.plot(x, filtered_data, label="Savitzky-Golay Filter")
+fig, ax = plt.subplots()
 
-plt.xlabel("Time")
-plt.ylabel("Sensor Reading")
+raw_plot, = ax.plot(x, sensor_data, label="Raw ECG Sensor Data")
+filtered_plot, = ax.plot(x, filtered_data, label="Savitzky-Golay Filter")
+
+plt.xlabel("Time (seconds)")
+plt.ylabel("ECG Voltage (mV)")
 plt.legend()
+
+
+# Creates toggle buttons
+check_ax = plt.axes([0.75, 0.75, 0.2, 0.12])
+
+check = CheckButtons(
+    check_ax,
+    ["Raw ECG Sensor Data", "Savitzky-Golay Filter"],
+    [True, True]
+)
+
+
+# Function that turns graphs on and off
+def toggle_graph(label):
+
+    if label == "Raw ECG Sensor Data":
+        raw_plot.set_visible(not raw_plot.get_visible())
+
+    elif label == "Savitzky-Golay Filter":
+        filtered_plot.set_visible(not filtered_plot.get_visible())
+
+    plt.draw()
+
+
+# Connects buttons to toggle function
+check.on_clicked(toggle_graph)
+
+
 plt.show()
