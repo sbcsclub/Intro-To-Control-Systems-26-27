@@ -1,46 +1,39 @@
 
-import random
+import numpy as np
+import random, math
 import matplotlib.pyplot as plt
 
-# 1. Generate simulated sensor readings
-num_readings = 100
-true_value = 50
+def moving_average(data, window_size):
+    filtered = []
 
-actual_readings = [true_value] * num_readings
+    # Move the window across the data
+    for i in range(len(data)):
+        start = max(0, i - window_size + 1)
+        window = data[start:i + 1]
 
-# 2. Add random noise to simulate an imperfect sensor
-noisy_readings = [
-    value + random.uniform(-10, 10)
-    for value in actual_readings
-]
+        # Calculate the average of the values in the window
+        average = sum(window) / len(window)
+        filtered.append(average)
 
-# 3. Apply a moving-average filter
-window_size = 5
-filtered_readings = []
+    return filtered
 
-for i in range(num_readings):
-    start = max(0, i - window_size + 1)
-    window = noisy_readings[start:i + 1]
-    average = sum(window) / len(window)
-    filtered_readings.append(average)
+num_points = 100
+x = np.linspace(0, 10, num_points) # Creates 100 evenly spaced points from 0-10
 
-# 4. Display the results
-print("First 10 noisy readings:")
-print([round(x, 2) for x in noisy_readings[:10]])
+true_signal = np.sin(x) + 5 # Creates target signal
 
-print("\nFirst 10 filtered readings:")
-print([round(x, 2) for x in filtered_readings[:10]])
+noise = np.random.normal(0, 0.25, num_points) # Creates random noise
 
-# 5. Plot the readings
-plt.figure(figsize=(10, 5))
+sensor_data = true_signal + noise # Simulates noisy sensor readings
 
-plt.plot(actual_readings, label="True Value")
-plt.plot(noisy_readings, label="Noisy Sensor Readings", alpha=0.5)
-plt.plot(filtered_readings, label="Moving Average Filter")
+filtered_data = moving_average(sensor_data, 11)
 
-plt.xlabel("Reading Number")
-plt.ylabel("Sensor Value")
-plt.title("Cleaning Up a Noisy Sensor")
+# Plots Data
+plt.plot(x, sensor_data, label="Noisy Sensor Data")
+plt.plot(x, true_signal, label="True Signal")
+plt.plot(x, filtered_data, label="Moving Average Filter")
+
+plt.xlabel("Time")
+plt.ylabel("Sensor Reading")
 plt.legend()
-plt.grid(True)
 plt.show()
