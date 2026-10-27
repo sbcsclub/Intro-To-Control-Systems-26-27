@@ -43,4 +43,8 @@ plt.ylabel("Sensor Value")
 plt.title("Cleaning Up a Noisy Sensor")
 plt.legend()
 plt.grid(True)
+<<<<<<< Updated upstream
 plt.show()
+=======
+plt.show()
+>>>>>>> Stashed changes
